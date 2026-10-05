@@ -9,20 +9,16 @@
 <body>
   <nav id="main-nav"></nav>
 
-  <header class="hero-slideshow">
-    <div class="slide slide-1"></div>
-    <div class="slide slide-2"></div>
-    <div class="slide slide-3"></div>
-    <div class="slide slide-4"></div>
-    <div class="hero-overlay">
-      <h1>AutoClean360</h1>
-      <p>Premium car wash, booked in seconds. Drive in dirty, drive out clean.</p>
+  <main class="container">
+    <section class="text-center">
+      <h1 style="font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 10px;">Drive in dirty. Drive out clean.</h1>
+      <p class="muted" style="max-width: 640px; margin: 0 auto 28px; font-size: 1.15rem;">
+        Premium car wash, booked in seconds. Slot-based service, quality products, and a shine that lasts.
+      </p>
       <a href="bookings.html" class="btn btn-lg">Book a Wash</a>
       <a href="services.html" class="btn btn-lg btn-secondary">View Services</a>
-    </div>
-  </header>
+    </section>
 
-  <main class="container">
     <section class="text-center">
       <h2>Why Choose Us</h2>
       <div class="grid">
@@ -50,14 +46,14 @@
     </section>
 
     <section>
-      <h2>Our Services</h2>
-      <p class="muted">Choose the wash that suits you. Prices are per vehicle.</p>
+      <h2 class="text-center">Our Services</h2>
+      <p class="muted text-center">Choose the wash that suits you. Prices are per vehicle.</p>
       <div id="services-preview" class="grid"></div>
       <p class="text-center mt-2"><a href="services.html" class="btn btn-secondary">All Services</a></p>
     </section>
 
     <section>
-      <h2>Our Work</h2>
+      <h2 class="text-center">Our Work</h2>
       <div class="gallery">
         <img src="OIP (2).webp" alt="Car being washed">
         <img src="OIP (3).webp" alt="Detailing in progress">
@@ -76,17 +72,16 @@
   </main>
 
   <footer>
-    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
+    <p style="margin: 0;">&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
   </footer>
 
   <script src="auth.js"></script>
   <script>
-    // Load a preview of the first 4 services.
     (async () => {
       const el = document.getElementById('services-preview');
       try {
         const rows = await api('/api/services');
-        if (!rows.length) { el.innerHTML = '<p class="muted">Services coming soon.</p>'; return; }
+        if (!rows.length) { el.innerHTML = '<p class="muted text-center">Services coming soon.</p>'; return; }
         el.innerHTML = rows.slice(0, 4).map(s => `
           <div class="card">
             <h3>${s.name}</h3>
@@ -94,7 +89,7 @@
             <p><strong>R${Number(s.price).toFixed(2)}</strong> · ${s.duration_min} min</p>
           </div>`).join('');
       } catch (err) {
-        el.innerHTML = '<p class="muted">Unable to load services right now.</p>';
+        el.innerHTML = '<p class="muted text-center">Unable to load services right now.</p>';
       }
     })();
   </script>

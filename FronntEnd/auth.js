@@ -1,5 +1,5 @@
 // Tiny auth helper shared by all pages.
-const API = ''; // same-origin; empty string means "current host"
+const API = ''; // same-origin
 const TOKEN_KEY = 'ac360_token';
 const USER_KEY = 'ac360_user';
 
@@ -40,23 +40,48 @@ async function api(path, opts = {}) {
   return data;
 }
 
+// Inject the shared slideshow background into every page.
+function injectSlideshow() {
+  if (document.querySelector('.bg-slideshow')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'bg-slideshow';
+  wrap.innerHTML = `
+    <div class="bg-slide s1"></div>
+    <div class="bg-slide s2"></div>
+    <div class="bg-slide s3"></div>
+    <div class="bg-slide s4"></div>
+    <div class="bg-overlay"></div>`;
+  document.body.prepend(wrap);
+}
+
 // Renders the top nav into <nav id="main-nav"></nav>.
 function renderNav() {
   const nav = document.getElementById('main-nav');
   if (!nav) return;
   const user = Auth.user;
-  const links = `
-    <a href="home.html">Home</a>
-    <a href="services.html">Services</a>
-    <a href="bookings.html">Bookings</a>
-    <a href="contact.html">Contact</a>`;
-  const adminLink = Auth.isAdmin() ? `<a href="admin.html">Admin</a>` : '';
+  const current = (location.pathname.split('/').pop() || 'home.html').toLowerCase();
+
+  const mkLink = (href, label) => {
+    const active = current === href.toLowerCase() ? ' class="active"' : '';
+    return `<a href="${href}"${active}>${label}</a>`;
+  };
+
+  const links = [
+    mkLink('home.html', 'Home'),
+    mkLink('services.html', 'Services'),
+    mkLink('bookings.html', 'Bookings'),
+    mkLink('contact.html', 'Contact'),
+  ].join('');
+
+  const adminLink = Auth.isAdmin() ? mkLink('admin.html', 'Admin') : '';
   const right = user
     ? `<span class="nav-user">Hi, ${user.name?.split(' ')[0] || 'there'}</span>
        ${adminLink}
-       <a href="#" onclick="Auth.logout();return false;">Logout</a>`
-    : `<a href="login.html">Login</a>`;
+       <a href="#" class="nav-logout" onclick="Auth.logout();return false;">Logout</a>`
+    : `<a href="login.html" class="nav-login">Login</a>`;
+
   nav.innerHTML = `
+    <div class="nav-brand"><a href="home.html">AutoClean360</a></div>
     <div class="nav-links">${links}</div>
     <div class="nav-actions">${right}</div>`;
 }
@@ -69,4 +94,7 @@ function requireAdmin() {
   if (!Auth.isAdmin()) location.href = 'home.html';
 }
 
-document.addEventListener('DOMContentLoaded', renderNav);
+document.addEventListener('DOMContentLoaded', () => {
+  injectSlideshow();
+  renderNav();
+});
