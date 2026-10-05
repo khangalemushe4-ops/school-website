@@ -45,24 +45,19 @@ function renderNav() {
   const nav = document.getElementById('main-nav');
   if (!nav) return;
   const user = Auth.user;
-  const guestLinks = `
+  const links = `
     <a href="home.html">Home</a>
     <a href="services.html">Services</a>
-    <a href="contact.html">Contact</a>`;
-  const userLinks = `
-    <a href="home.html">Home</a>
     <a href="bookings.html">Bookings</a>
-    <a href="vehicles.html">Vehicles</a>
     <a href="contact.html">Contact</a>`;
   const adminLink = Auth.isAdmin() ? `<a href="admin.html">Admin</a>` : '';
   const right = user
     ? `<span class="nav-user">Hi, ${user.name?.split(' ')[0] || 'there'}</span>
        ${adminLink}
        <a href="#" onclick="Auth.logout();return false;">Logout</a>`
-    : `<a href="login.html">Login</a>
-       <a href="signup.html" class="nav-cta">Sign up</a>`;
+    : `<a href="login.html">Login</a>`;
   nav.innerHTML = `
-    <div class="nav-links">${user ? userLinks : guestLinks}</div>
+    <div class="nav-links">${links}</div>
     <div class="nav-actions">${right}</div>`;
 }
 

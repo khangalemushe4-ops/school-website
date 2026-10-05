@@ -9,49 +9,69 @@
 <body>
   <nav id="main-nav"></nav>
 
-  <header class="hero">
-    <h1>AutoClean360 Car Wash Management</h1>
-    <p>Book your slot, manage your vehicles, and get notified. Clean cars, made simple.</p>
-    <a href="bookings.html" class="btn">Book a Wash</a>
-    <a href="signup.html" class="btn btn-secondary">Create Account</a>
+  <header class="hero-slideshow">
+    <div class="slide slide-1"></div>
+    <div class="slide slide-2"></div>
+    <div class="slide slide-3"></div>
+    <div class="slide slide-4"></div>
+    <div class="hero-overlay">
+      <h1>AutoClean360</h1>
+      <p>Premium car wash, booked in seconds. Drive in dirty, drive out clean.</p>
+      <a href="bookings.html" class="btn btn-lg">Book a Wash</a>
+      <a href="services.html" class="btn btn-lg btn-secondary">View Services</a>
+    </div>
   </header>
 
   <main class="container">
-    <section>
-      <h2>Why AutoClean360?</h2>
+    <section class="text-center">
+      <h2>Why Choose Us</h2>
       <div class="grid">
-        <div class="card">
-          <h3>Mobile Bookings</h3>
-          <p>Reserve your wash slot from any device, any time — no phone calls needed.</p>
+        <div class="card feature">
+          <div class="feature-icon">🚗</div>
+          <h3>Fast &amp; Easy Booking</h3>
+          <p>Reserve your slot online in under a minute — no phone calls, no waiting.</p>
         </div>
-        <div class="card">
-          <h3>Vehicle Portfolio</h3>
-          <p>Save your cars once and reuse their details for every future booking.</p>
+        <div class="card feature">
+          <div class="feature-icon">💧</div>
+          <h3>Quality Products</h3>
+          <p>Professional-grade soaps and waxes that protect your paint and shine.</p>
         </div>
-        <div class="card">
-          <h3>Live Alerts</h3>
-          <p>Instant email or SMS notifications about bookings and service updates.</p>
+        <div class="card feature">
+          <div class="feature-icon">⏱️</div>
+          <h3>On-Time Service</h3>
+          <p>We respect your schedule. Slot-based bookings mean no long waits.</p>
+        </div>
+        <div class="card feature">
+          <div class="feature-icon">🔔</div>
+          <h3>Live Updates</h3>
+          <p>Instant notifications when your booking is confirmed or ready.</p>
         </div>
       </div>
+    </section>
+
+    <section>
+      <h2>Our Services</h2>
+      <p class="muted">Choose the wash that suits you. Prices are per vehicle.</p>
+      <div id="services-preview" class="grid"></div>
+      <p class="text-center mt-2"><a href="services.html" class="btn btn-secondary">All Services</a></p>
     </section>
 
     <section>
       <h2>Our Work</h2>
       <div class="gallery">
-        <img src="OIP (1).webp" alt="Car being washed">
-        <img src="OIP (2).webp" alt="Clean car after wash">
+        <img src="OIP (2).webp" alt="Car being washed">
         <img src="OIP (3).webp" alt="Detailing in progress">
         <img src="OIP (4).webp" alt="Interior cleaning">
         <img src="OIP (5).webp" alt="Car shampoo foam">
         <img src="OIP (6).webp" alt="Polished car exterior">
+        <img src="OIP (1).webp" alt="Clean car after wash">
       </div>
     </section>
 
-    <section class="center">
-      <h2>Ready to get started?</h2>
-      <p class="muted">Create an account to save your vehicles and bookings, or browse first.</p>
-      <a href="signup.html" class="btn">Sign Up Free</a>
-      <a href="services.html" class="btn btn-secondary">Browse Services</a>
+    <section class="text-center">
+      <h2>Ready to shine?</h2>
+      <p class="muted">Book your slot now and let us handle the rest.</p>
+      <a href="bookings.html" class="btn btn-lg">Book Now</a>
     </section>
   </main>
 
@@ -60,5 +80,23 @@
   </footer>
 
   <script src="auth.js"></script>
+  <script>
+    // Load a preview of the first 4 services.
+    (async () => {
+      const el = document.getElementById('services-preview');
+      try {
+        const rows = await api('/api/services');
+        if (!rows.length) { el.innerHTML = '<p class="muted">Services coming soon.</p>'; return; }
+        el.innerHTML = rows.slice(0, 4).map(s => `
+          <div class="card">
+            <h3>${s.name}</h3>
+            <p class="muted">${s.description || ''}</p>
+            <p><strong>R${Number(s.price).toFixed(2)}</strong> · ${s.duration_min} min</p>
+          </div>`).join('');
+      } catch (err) {
+        el.innerHTML = '<p class="muted">Unable to load services right now.</p>';
+      }
+    })();
+  </script>
 </body>
 </html>

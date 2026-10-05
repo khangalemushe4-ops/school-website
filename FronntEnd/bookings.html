@@ -10,13 +10,10 @@
   <nav id="main-nav"></nav>
   <main class="container">
     <h2>Book Your Car Wash</h2>
-    <p class="muted">Pick a vehicle, a service, a date, and a time. Instant confirmation.</p>
+    <p class="muted">Pick a service, a date, and a time. We'll take it from there.</p>
     <div id="msg"></div>
 
     <form id="booking-form" class="card" style="max-width:560px;">
-      <label>Vehicle
-        <select name="vehicle_id" id="vehicle_id" required></select>
-      </label>
       <label>Service
         <select name="service_id" id="service_id" required></select>
       </label>
@@ -40,16 +37,13 @@
     const form = document.getElementById('booking-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('list');
-    const vehicleSel = document.getElementById('vehicle_id');
     const serviceSel = document.getElementById('service_id');
 
-    async function loadDropdowns() {
-      const [vehicles, services] = await Promise.all([api('/api/vehicles'), api('/api/services')]);
-      if (!vehicles.length) {
-        msg.innerHTML = '<div class="alert alert-error">You have no vehicles yet. <a href="vehicles.html">Add one first</a>.</div>';
-      }
-      vehicleSel.innerHTML = vehicles.map(v => `<option value="${v.id}">${v.make_model} — ${v.reg_number}</option>`).join('');
-      serviceSel.innerHTML = services.map(s => `<option value="${s.id}">${s.name} — R${Number(s.price).toFixed(2)} (${s.duration_min}min)</option>`).join('');
+    async function loadServices() {
+      const services = await api('/api/services');
+      serviceSel.innerHTML = services.map(s =>
+        `<option value="${s.id}">${s.name} — R${Number(s.price).toFixed(2)} (${s.duration_min}min)</option>`
+      ).join('');
     }
 
     async function loadBookings() {
@@ -58,12 +52,11 @@
         if (!rows.length) { listEl.innerHTML = '<p class="muted">No bookings yet.</p>'; return; }
         listEl.innerHTML = `
           <table>
-            <thead><tr><th>Date</th><th>Time</th><th>Vehicle</th><th>Service</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Date</th><th>Time</th><th>Service</th><th>Status</th><th></th></tr></thead>
             <tbody>${rows.map(b => `
               <tr>
                 <td>${b.booking_date?.slice(0,10)}</td>
                 <td>${b.booking_time}</td>
-                <td>${b.vehicle.make_model} (${b.vehicle.reg_number})</td>
                 <td>${b.service.name} — R${Number(b.service.price).toFixed(2)}</td>
                 <td><span class="pill pill-${b.status}">${b.status}</span></td>
                 <td>
@@ -82,7 +75,6 @@
       e.preventDefault();
       msg.innerHTML = '';
       const body = {
-        vehicle_id: Number(vehicleSel.value),
         service_id: Number(serviceSel.value),
         booking_date: form.booking_date.value,
         booking_time: form.booking_time.value,
@@ -109,7 +101,7 @@
 
     (async () => {
       try {
-        await loadDropdowns();
+        await loadServices();
         await loadBookings();
       } catch (err) {
         msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;

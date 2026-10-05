@@ -14,19 +14,21 @@ const toMinutes = (hhmm) => {
 };
 
 const bookingSchema = z.object({
-  vehicle_id: z.coerce.number().int().positive(),
   service_id: z.coerce.number().int().positive(),
   booking_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
   booking_time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM (24h)'),
+  vehicle_id: z.coerce.number().int().positive().optional(),
 });
 
 const SELECT_BOOKINGS = `
   SELECT b.id, b.booking_date, b.booking_time, b.status, b.created_at,
-    json_build_object('id', v.id, 'make_model', v.make_model, 'reg_number', v.reg_number) AS vehicle,
+    CASE WHEN v.id IS NULL THEN NULL ELSE
+      json_build_object('id', v.id, 'make_model', v.make_model, 'reg_number', v.reg_number)
+    END AS vehicle,
     json_build_object('id', s.id, 'name', s.name, 'price', s.price, 'duration_min', s.duration_min) AS service,
     json_build_object('amount', p.amount, 'status', p.status) AS payment
   FROM bookings b
-  JOIN vehicles v ON v.id = b.vehicle_id
+  LEFT JOIN vehicles v ON v.id = b.vehicle_id
   JOIN services s ON s.id = b.service_id
   LEFT JOIN payments p ON p.booking_id = b.id`;
 
@@ -67,9 +69,6 @@ router.post('/', async (req, res) => {
   const b = bookingSchema.parse(req.body);
 
   const bookingId = await db.tx(async (c) => {
-    const vehicle = await c.query('SELECT id FROM vehicles WHERE id = $1 AND user_id = $2', [b.vehicle_id, req.user.id]);
-    if (!vehicle.rowCount) throw new HttpError(404, 'Vehicle not found');
-
     const svcRes = await c.query('SELECT id, price, duration_min FROM services WHERE id = $1', [b.service_id]);
     if (!svcRes.rowCount) throw new HttpError(404, 'Service not found');
     const svc = svcRes.rows[0];
@@ -84,7 +83,6 @@ router.post('/', async (req, res) => {
     ]);
     if (past.rows[0].past) throw new HttpError(400, 'Booking time is in the past');
 
-    // Serialise bookings per day so two people can't grab the same slot
     await c.query('SELECT pg_advisory_xact_lock(hashtext($1))', [b.booking_date]);
 
     const clash = await c.query(
@@ -100,7 +98,7 @@ router.post('/', async (req, res) => {
     const { rows } = await c.query(
       `INSERT INTO bookings (user_id, vehicle_id, service_id, booking_date, booking_time)
        VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-      [req.user.id, b.vehicle_id, b.service_id, b.booking_date, b.booking_time]
+      [req.user.id, b.vehicle_id || null, b.service_id, b.booking_date, b.booking_time]
     );
     await c.query('INSERT INTO payments (booking_id, amount) VALUES ($1,$2)', [rows[0].id, svc.price]);
     return rows[0].id;
