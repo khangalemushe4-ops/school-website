@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOTIFICATIONS</title>
+  <link rel="stylesheet" href="style.css">
+  </head>
+  <nav>
+  <a href="HOME.HTML">HOME</a>
+   <a href="BOOKINGS.HTML">BOOKINGS</a>
+    <a href="Vehicles.HTML">VEHICLES</a>
+    <a href="PAYMENTS.HTML">PAYMENTS</a>
+    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
+  </nav>
+<body>
+<section id="notifications">
+  <h2>Stay Updated</h2>
+  <p>We’ll keep you informed about your bookings, payments, and car wash status. Choose how you’d like to receive notifications.</p>
+  
+  <form>
+    <label>
+      <input type="checkbox" name="notify_booking" checked>
+      Booking Confirmations
+    </label><br><br>
+    
+    <label>
+      <input type="checkbox" name="notify_payment" checked>
+      Payment Receipts
+    </label><br><br>
+    
+    <label>
+      <input type="checkbox" name="notify_reminder">
+      Service Reminders
+    </label><br><br>
+    
+    <label>
+      <input type="checkbox" name="notify_completion">
+      Completion Alerts
+    </label><br><br>
+    
+    <label>Preferred Notification Method:
+      <select name="method" required>
+        <option value="email">Email</option>
+        <option value="sms">SMS</option>
+        <option value="both">Both</option>
+      </select>
+    </label><br><br>
+    
+    <button class="btn" type="submit"><a href="Update Preferences.HTML">Update Preferences</a></button>
+  </form>
+</section>
+
+<footer>
+  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
+    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookings</title>
+ <link rel="stylesheet" href="style.css">
+ 
+ 
+ </head>
+ <body>
+  <nav>
+  <a href="HOME.HTML">HOME</a>
+   <a href="BOOKINGS.HTML">BOOKINGS</a>
+    <a href="Vehicles.HTML">VEHICLES</a>
+    <a href="PAYMENTS.HTML">PAYMENTS</a>
+    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
+  </nav>
+  
+  
+  <section id="bookings">
+  <h2>Book Your Car Wash</h2>
+  <p>Fill in the details below to schedule your wash. Instant confirmation guaranteed!</p>
+  
+  <form>
+    <label>Vehicle Make & Model:
+      <input type="text" name="vehicle" required>
+    </label><br><br>
+    
+    <label>Registration Number:
+      <input type="text" name="reg" required>
+    </label><br><br>
+    
+    <label>Service Type:
+      <select name="service" required>
+        <option value="standard">Standard Wash</option>
+        <option value="deluxe">Deluxe Wash</option>
+        <option value="interior">Interior Cleaning</option>
+        <option value="detailing">Full Detailing</option>
+      </select>
+    </label><br><br>
+    
+    <label>Date:
+      <input type="date" name="date" required>
+    </label><br><br>
+    
+    <label>Time:
+      <input type="time" name="time" required>
+    </label><br><br>
+    
+    <label>Contact Email:
+      <input type="email" name="email" required>
+    </label><br><br>
+    
+    <button class="btn" type="submit">Confirm Booking</button>
+  </form>
+</section>
+
+ <footer>
+  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
+    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
+  </div>
+</footer>
+
+	
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VEHICLES</title>
+ <link rel="stylesheet" href="style.css">
+ </head>
+<body ><background-image="OIP (6).webp" alt="background-position" >
+ <nav>
+ <a href="HOME.HTML">HOME</a>
+   <a href="BOOKINGS.HTML">BOOKINGS</a>
+    <a href="Vehicles.HTML">VEHICLES</a>
+    <a href="PAYMENTS.HTML">PAYMENTS</a>
+    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
+  </nav>
+
+<img src="OIP (6).webp" alt="Car being washed" width="400px" height="200px">
+<img src="OIP (5).webp" alt="Car being washed" width="400px" height="200px">
+<img src="OIP (4).webp" alt="Car being washed" width="400px" height="200px">
+
+
+<section id="vehicles">
+  <h2>Manage Your Vehicles</h2>
+  <p>Add or update your car details below. You can store multiple vehicles for easy booking.</p>
+  
+  <form>
+    <label>Vehicle Make & Model:
+      <input type="text" name="make_model" required>
+    </label><br><br>
+    
+    <label>Year:
+      <input type="number" name="year" min="1990" max="2026" required>
+    </label><br><br>
+    
+    <label>Registration Number:
+      <input type="text" name="reg_number" required>
+    </label><br><br>
+    
+    <label>Color:
+      <input type="text" name="color">
+    </label><br><br>
+    
+    <label>Preferred Service:
+      <select name="service">
+        <option value="standard">Standard Wash</option>
+        <option value="deluxe">Deluxe Wash</option>
+        <option value="interior">Interior Cleaning</option>
+        <option value="detailing">Full Detailing</option>
+      </select>
+    </label><br><br>
+    
+    <button class="btn" type="submit">Add Vehicle</button>
+  </form>
+  
+  <h3>My Vehicles</h3>
+   <style>
+    table {
+      width: 100%;
+      border-collapse: collapse; /* merges borders */
+      margin: 20px 0;
+      font-size: 16px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px; /* replaces cellpadding */
+    }
+    th {
+      background-color: #0077cc;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f4f9ff;
+    }
+    tr:hover {
+      background-color: #d9ecff;
+      transition: 0.3s;
+    }
+    button {
+      background: #0077cc;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+  </style>
+</head>
+<body>
+  <table>
+    <tr>
+      <th>Make & Model</th>
+      <th>Year</th>
+      <th>Reg Number</th>
+      <th>Color</th>
+      <th>Service</th>
+      <th>Actions</th>
+    </tr>
+    <tr>
+      <td>Toyota Corolla</td>
+      <td>2020</td>
+      <td>ABC123</td>
+      <td>Blue</td>
+      <td>Deluxe Wash</td>
+      <td>
+        <button>Edit</button>
+        <button>Delete</button>
+      </td>
+    </tr>
+  </table>
+</section>
+
+ <footer>
+  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
+    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
+  </div>
+</footer>
+
+
+</body>
+</html>

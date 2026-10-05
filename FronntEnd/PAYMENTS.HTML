@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAYMENTS</title>
+ <link rel="stylesheet" href="style.css">
+</Head>
+<body>
+<nav>
+<a href="HOME.HTML">HOME</a>
+   <a href="BOOKINGS.HTML">BOOKINGS</a>
+    <a href="Vehicles.HTML">VEHICLES</a>
+    <a href="PAYMENTS.HTML">PAYMENTS</a>
+    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
+  </nav>
+
+<section id="payments">
+  <h2>Secure Online Payments</h2>
+  <p>Complete your booking payment safely using our trusted payment gateway.</p>
+  
+  <form>
+    <label>Cardholder Name:
+      <input type="text" name="card_name" required>
+    </label><br><br>
+    
+    <label>Card Number:
+      <input type="text" name="card_number" maxlength="16" required>
+    </label><br><br>
+    
+    <label>Expiry Date:
+      <input type="month" name="expiry" required>
+    </label><br><br>
+    
+    <label>CVV:
+      <input type="password" name="cvv" maxlength="3" required>
+    </label><br><br>
+    
+    <label>Billing Address:
+      <input type="text" name="address" required>
+    </label><br><br>
+    
+    <button class="btn" type="submit">Pay Now</button>
+  </form>
+</section>
+
+<footer>
+  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
+    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
+  </div>
+</footer>
+
+
+</body>
+   </html>
