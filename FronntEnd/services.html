@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services — AutoClean360</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <main class="container">
+    <h2>Our Services</h2>
+    <p class="muted">Prices and durations. Book any of these from the Bookings page.</p>
+    <div id="services" class="grid"></div>
+  </main>
+  <footer><p>&copy; 2026 AutoClean360</p></footer>
+
+  <script src="auth.js"></script>
+  <script>
+    (async () => {
+      const el = document.getElementById('services');
+      try {
+        const rows = await api('/api/services');
+        if (!rows.length) { el.innerHTML = '<p class="muted">No services yet.</p>'; return; }
+        el.innerHTML = rows.map((s) => `
+          <div class="card">
+            <h3>${s.name}</h3>
+            <p class="muted">${s.description || ''}</p>
+            <p><strong>R${Number(s.price).toFixed(2)}</strong> · ${s.duration_min} min</p>
+            <a class="btn" href="bookings.html">Book now</a>
+          </div>`).join('');
+      } catch (err) {
+        el.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>

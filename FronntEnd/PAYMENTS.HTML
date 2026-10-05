@@ -3,53 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAYMENTS</title>
- <link rel="stylesheet" href="style.css">
-</Head>
+  <title>Payments — AutoClean360</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<nav>
-<a href="HOME.HTML">HOME</a>
-   <a href="BOOKINGS.HTML">BOOKINGS</a>
-    <a href="Vehicles.HTML">VEHICLES</a>
-    <a href="PAYMENTS.HTML">PAYMENTS</a>
-    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
-  </nav>
+  <nav id="main-nav"></nav>
+  <main class="container">
+    <h2>Your Payments</h2>
+    <p class="muted">Pay online using our mock gateway (swap for Yoco/PayFast later).</p>
+    <div id="msg"></div>
+    <div id="list"></div>
+  </main>
+  <footer><p>&copy; 2026 AutoClean360</p></footer>
 
-<section id="payments">
-  <h2>Secure Online Payments</h2>
-  <p>Complete your booking payment safely using our trusted payment gateway.</p>
-  
-  <form>
-    <label>Cardholder Name:
-      <input type="text" name="card_name" required>
-    </label><br><br>
-    
-    <label>Card Number:
-      <input type="text" name="card_number" maxlength="16" required>
-    </label><br><br>
-    
-    <label>Expiry Date:
-      <input type="month" name="expiry" required>
-    </label><br><br>
-    
-    <label>CVV:
-      <input type="password" name="cvv" maxlength="3" required>
-    </label><br><br>
-    
-    <label>Billing Address:
-      <input type="text" name="address" required>
-    </label><br><br>
-    
-    <button class="btn" type="submit">Pay Now</button>
-  </form>
-</section>
+  <script src="auth.js"></script>
+  <script>
+    requireAuth();
+    const listEl = document.getElementById('list');
+    const msg = document.getElementById('msg');
 
-<footer>
-  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
-    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
-  </div>
-</footer>
+    async function load() {
+      try {
+        const bookings = await api('/api/bookings');
+        if (!bookings.length) { listEl.innerHTML = '<p class="muted">No bookings yet.</p>'; return; }
+        listEl.innerHTML = `
+          <table>
+            <thead><tr><th>Date</th><th>Service</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${bookings.map(b => `
+              <tr>
+                <td>${b.booking_date?.slice(0,10)} ${b.booking_time}</td>
+                <td>${b.service.name}</td>
+                <td>R${Number(b.payment?.amount || b.service.price).toFixed(2)}</td>
+                <td><span class="pill pill-${b.payment?.status || 'unpaid'}">${b.payment?.status || 'unpaid'}</span></td>
+                <td>
+                  ${b.payment?.status === 'paid'
+                    ? '<span class="muted">Paid</span>'
+                    : `<button class="btn btn-sm" data-pay="${b.id}">Pay Now</button>`}
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+      } catch (err) {
+        listEl.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    }
 
+    listEl.addEventListener('click', async (e) => {
+      const id = e.target.dataset.pay;
+      if (!id) return;
+      if (!confirm('Pay R amount for this booking now?')) return;
+      try {
+        await api('/api/payments/booking/' + id + '/pay', { method: 'POST' });
+        msg.innerHTML = '<div class="alert alert-success">Payment recorded.</div>';
+        load();
+      } catch (err) { msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`; }
+    });
 
+    load();
+  </script>
 </body>
-   </html>
+</html>

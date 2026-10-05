@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — AutoClean360</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <main class="container">
+    <h2>Create your account</h2>
+    <div id="msg"></div>
+    <form id="signup-form">
+      <label>Full Name
+        <input type="text" name="name" required maxlength="100">
+      </label>
+      <label>Email
+        <input type="email" name="email" required>
+      </label>
+      <label>Phone (optional)
+        <input type="tel" name="phone" maxlength="30">
+      </label>
+      <label>Password (min 8 characters)
+        <input type="password" name="password" required minlength="8">
+      </label>
+      <label>Notify me by
+        <select name="notify_method">
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+        </select>
+      </label>
+      <button class="btn" type="submit">Sign up</button>
+      <p class="muted mt-2">Already have an account? <a href="login.html">Log in</a></p>
+    </form>
+  </main>
+  <footer><p>&copy; 2026 AutoClean360</p></footer>
+
+  <script src="auth.js"></script>
+  <script>
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.innerHTML = '';
+      const f = e.target;
+      const body = {
+        name: f.name.value.trim(),
+        email: f.email.value.trim(),
+        phone: f.phone.value.trim() || undefined,
+        password: f.password.value,
+        notify_method: f.notify_method.value,
+      };
+      try {
+        const { user, token } = await api('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
+        Auth.save(token, user);
+        location.href = 'home.html';
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>

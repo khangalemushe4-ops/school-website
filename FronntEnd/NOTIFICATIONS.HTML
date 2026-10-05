@@ -3,59 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NOTIFICATIONS</title>
+  <title>Notifications — AutoClean360</title>
   <link rel="stylesheet" href="style.css">
-  </head>
-  <nav>
-  <a href="HOME.HTML">HOME</a>
-   <a href="BOOKINGS.HTML">BOOKINGS</a>
-    <a href="Vehicles.HTML">VEHICLES</a>
-    <a href="PAYMENTS.HTML">PAYMENTS</a>
-    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
-  </nav>
+</head>
 <body>
-<section id="notifications">
-  <h2>Stay Updated</h2>
-  <p>We’ll keep you informed about your bookings, payments, and car wash status. Choose how you’d like to receive notifications.</p>
-  
-  <form>
-    <label>
-      <input type="checkbox" name="notify_booking" checked>
-      Booking Confirmations
-    </label><br><br>
-    
-    <label>
-      <input type="checkbox" name="notify_payment" checked>
-      Payment Receipts
-    </label><br><br>
-    
-    <label>
-      <input type="checkbox" name="notify_reminder">
-      Service Reminders
-    </label><br><br>
-    
-    <label>
-      <input type="checkbox" name="notify_completion">
-      Completion Alerts
-    </label><br><br>
-    
-    <label>Preferred Notification Method:
-      <select name="method" required>
-        <option value="email">Email</option>
-        <option value="sms">SMS</option>
-        <option value="both">Both</option>
-      </select>
-    </label><br><br>
-    
-    <button class="btn" type="submit"><a href="Update Preferences.HTML">Update Preferences</a></button>
-  </form>
-</section>
+  <nav id="main-nav"></nav>
+  <main class="container">
+    <h2>Notification Preferences</h2>
+    <div id="msg"></div>
+    <form id="prefs-form" class="card" style="max-width:480px;">
+      <label>Notify me by
+        <select name="notify_method">
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+        </select>
+      </label>
+      <button class="btn" type="submit">Save</button>
+    </form>
 
-<footer>
-  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
-    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
-  </div>
-</footer>
+    <h3 class="mt-2">Your Bookings</h3>
+    <div id="list"></div>
+  </main>
+  <footer><p>&copy; 2026 AutoClean360</p></footer>
 
+  <script src="auth.js"></script>
+  <script>
+    requireAuth();
+    const msg = document.getElementById('msg');
+    const form = document.getElementById('prefs-form');
+
+    (async () => {
+      try {
+        const me = await api('/api/auth/me');
+        form.notify_method.value = me.notify_method || 'email';
+      } catch (e) { /* ignore */ }
+      try {
+        const rows = await api('/api/notifications');
+        const list = document.getElementById('list');
+        if (!rows.length) { list.innerHTML = '<p class="muted">No notifications yet.</p>'; return; }
+        list.innerHTML = `<table><thead><tr><th>Date</th><th>Message</th></tr></thead><tbody>${
+          rows.map(n => `<tr><td>${new Date(n.created_at).toLocaleString()}</td><td>${n.message || n.title || ''}</td></tr>`).join('')
+        }</tbody></table>`;
+      } catch (e) { /* ignore */ }
+    })();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.innerHTML = '';
+      try {
+        await api('/api/auth/me', {
+          method: 'PUT',
+          body: JSON.stringify({ notify_method: form.notify_method.value }),
+        });
+        msg.innerHTML = '<div class="alert alert-success">Preferences saved.</div>';
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    });
+  </script>
 </body>
 </html>

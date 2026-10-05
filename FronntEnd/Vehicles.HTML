@@ -3,124 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VEHICLES</title>
- <link rel="stylesheet" href="style.css">
- </head>
-<body ><background-image="OIP (6).webp" alt="background-position" >
- <nav>
- <a href="HOME.HTML">HOME</a>
-   <a href="BOOKINGS.HTML">BOOKINGS</a>
-    <a href="Vehicles.HTML">VEHICLES</a>
-    <a href="PAYMENTS.HTML">PAYMENTS</a>
-    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
-  </nav>
-
-<img src="OIP (6).webp" alt="Car being washed" width="400px" height="200px">
-<img src="OIP (5).webp" alt="Car being washed" width="400px" height="200px">
-<img src="OIP (4).webp" alt="Car being washed" width="400px" height="200px">
-
-
-<section id="vehicles">
-  <h2>Manage Your Vehicles</h2>
-  <p>Add or update your car details below. You can store multiple vehicles for easy booking.</p>
-  
-  <form>
-    <label>Vehicle Make & Model:
-      <input type="text" name="make_model" required>
-    </label><br><br>
-    
-    <label>Year:
-      <input type="number" name="year" min="1990" max="2026" required>
-    </label><br><br>
-    
-    <label>Registration Number:
-      <input type="text" name="reg_number" required>
-    </label><br><br>
-    
-    <label>Color:
-      <input type="text" name="color">
-    </label><br><br>
-    
-    <label>Preferred Service:
-      <select name="service">
-        <option value="standard">Standard Wash</option>
-        <option value="deluxe">Deluxe Wash</option>
-        <option value="interior">Interior Cleaning</option>
-        <option value="detailing">Full Detailing</option>
-      </select>
-    </label><br><br>
-    
-    <button class="btn" type="submit">Add Vehicle</button>
-  </form>
-  
-  <h3>My Vehicles</h3>
-   <style>
-    table {
-      width: 100%;
-      border-collapse: collapse; /* merges borders */
-      margin: 20px 0;
-      font-size: 16px;
-      text-align: center;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 12px; /* replaces cellpadding */
-    }
-    th {
-      background-color: #0077cc;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #f4f9ff;
-    }
-    tr:hover {
-      background-color: #d9ecff;
-      transition: 0.3s;
-    }
-    button {
-      background: #0077cc;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #005fa3;
-    }
-  </style>
+  <title>My Vehicles — AutoClean360</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <table>
-    <tr>
-      <th>Make & Model</th>
-      <th>Year</th>
-      <th>Reg Number</th>
-      <th>Color</th>
-      <th>Service</th>
-      <th>Actions</th>
-    </tr>
-    <tr>
-      <td>Toyota Corolla</td>
-      <td>2020</td>
-      <td>ABC123</td>
-      <td>Blue</td>
-      <td>Deluxe Wash</td>
-      <td>
-        <button>Edit</button>
-        <button>Delete</button>
-      </td>
-    </tr>
-  </table>
-</section>
+  <nav id="main-nav"></nav>
+  <main class="container">
+    <h2>My Vehicles</h2>
+    <div id="msg"></div>
 
- <footer>
-  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
-    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
-  </div>
-</footer>
+    <form id="vehicle-form" class="card" style="max-width:520px;">
+      <h3 id="form-title">Add a vehicle</h3>
+      <input type="hidden" name="id">
+      <label>Make &amp; Model
+        <input type="text" name="make_model" required maxlength="100">
+      </label>
+      <label>Year
+        <input type="number" name="year" min="1900" max="2100">
+      </label>
+      <label>Registration Number
+        <input type="text" name="reg_number" required maxlength="20">
+      </label>
+      <label>Color
+        <input type="text" name="color" maxlength="30">
+      </label>
+      <label>Preferred Service (optional)
+        <input type="text" name="preferred_service" maxlength="100">
+      </label>
+      <button class="btn" type="submit">Save Vehicle</button>
+      <button class="btn btn-secondary" type="button" id="cancel-edit" style="display:none;">Cancel</button>
+    </form>
 
+    <h3 class="mt-2">Saved Vehicles</h3>
+    <div id="vehicles"></div>
+  </main>
+  <footer><p>&copy; 2026 AutoClean360</p></footer>
 
-</body>
-</html>
+  <script src="auth.js"></script>
+  <script>
+    requireAuth();
+    const form = document.getElementById('vehicle-form');
+    const listEl = document.getElementById('vehicles');
+    const msg = document.getElementById('msg');
+    const cancelBtn = document.getElementById('cancel-edit');
+    const title = document.getElementById('form-title');
+
+    function resetForm() {
+      form.reset();
+      form.id.value = '';
+      title.textContent = 'Add a vehicle';
+      cancelBtn.style.display = 'none';
+    }
+
+    async function load() {
+      try {
+        const rows = await api('/api/vehicles');
+        if (!rows.length) { listEl.innerHTML = '<p class="muted">No vehicles yet.</p>'; return; }
+        listEl.innerHTML = `
+          <table>
+            <thead><tr><th>Make &amp; Model</th><th>Year</th><th>Reg</th><th>Color</th><th>Service</th><th>Actions</th></tr></thead>
+            <tbody>${rows.map(v => `
+              <tr>
+                <td>${v.make_model}</td>
+                <td>${v.year ?? '—'}</td>
+                <td>${v.reg_number}</td>
+                <td>${v.color ?? '—'}</td>
+                <td>${v.preferred_service ?? '—'}</td>
+                <td>
+                  <button class="btn btn-sm" data-edit='${JSON.stringify(v).replace(/'/g, "&#39;")}'>Edit</button>
+                  <button class="btn btn-sm btn-danger" data-del="${v.id}">Delete</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+      } catch (err) {
+        listEl.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.innerHTML = '';
+      const body = {
+        make_model: form.make_model.value.trim(),
+        year: form.year.value ? Number(form.year.value) : undefined,
+        reg_number: form.reg_number.value.trim(),
+        color: form.color.value.trim() || undefined,
+        preferred_service: form.preferred_service.value.trim() || undefined,
+      };
+      try {
+        if (form.id.value) {
+          await api('/api/vehicles/' + form.id.value, { method: 'PUT', body: JSON.stringify(body) });
+        } else {
+          await api('/api/vehicles', { method: 'POST', body: JSON.stringify(body) });
+        }
+        msg.innerHTML = '<div class="alert alert-success">Saved.</div>';
+        resetForm();
+        load();
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    });
+
+    listEl.addEventListener('click', async (e) => {
+      const del = e.target.dataset.del;
+      const edit = e.target.dataset.edit;
+      if (del) {
+        if (!confirm('Delete this vehicle?')) return;
+        try {
+          await api('/api/vehicles/' + del, { method: 'DELETE' });
+          load();
+        } catch (err) { alert(err.message); }
+      } else if (edit) {
+        const v = JSON.parse(edit);
+        form.id.value = v.id;
+        form.make_model.value = v.make_model;
+        form.year.value = v.year ?? '';
+        form.reg_number.value = v.reg_number;
+        form.color

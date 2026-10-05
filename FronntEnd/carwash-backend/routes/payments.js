@@ -14,7 +14,26 @@ router.get('/booking/:bookingId', auth, async (req, res) => {
   if (!rows[0]) throw new HttpError(404, 'Payment not found');
   res.json(rows[0]);
 });
+// Mock payment — marks a booking's payment as paid. Replace with a real gateway later.
+router.post('/booking/:bookingId/pay', auth, async (req, res) => {
+  const bookingId = parseId(req.params.bookingId);
+  const result = await db.tx(async (c) => {
+    const own = await c.query(
+      'SELECT id FROM bookings WHERE id = $1 AND user_id = $2',
+      [bookingId, req.user.id]
+    );
+    if (!own.rowCount) throw new HttpError(404, 'Booking not found');
 
+    const p = await c.query(
+      `UPDATE payments SET status = 'paid', paid_at = now(), gateway_ref = $2
+       WHERE booking_id = $1 RETURNING *`,
+      [bookingId, 'MOCK-' + Date.now()]
+    );
+    await c.query(`UPDATE bookings SET status = 'confirmed' WHERE id = $1 AND status = 'pending'`, [bookingId]);
+    return p.rows[0];
+  });
+  res.json(result);
+});
 // Called by your payment gateway (PayFast / Yoco / Paystack etc.), NOT by the browser.
 // Adapt the body parsing to your gateway's payload format.
 router.post('/webhook', async (req, res) => {

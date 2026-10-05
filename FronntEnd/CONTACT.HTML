@@ -1,52 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoClean360 - Contact</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — AutoClean360</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <nav>
-            
-			<a href="HOME.HTML"><a>HOME</a>
-                <a href="BOOKINGS.HTML">BOOKINGS</a>
-                <a href="PAYMENTS.HTML">PAYMENTS</a>
-               <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
-               <a href="CONTACT.HTML">CONTACT</a>
-           
-        </nav>
-    </header>
+  <nav id="main-nav"></nav>
+  <main class="container">
+    <h2>Contact Us</h2>
+    <p class="muted">79 Sarel Cilliers, Pretoria North · 013 758 5456 · info@AutoClean360.co.za</p>
+    <div id="msg"></div>
 
-    <section class="contact">
-        <h2>Contact Us</h2>
-        <form action="" method="post">
-            <label for="name">Full Name:</label>
-            <input type="text" id="name" name="name" required>
+    <form id="contact-form" class="card" style="max-width:520px;">
+      <label>Full Name
+        <input type="text" name="name" required maxlength="100">
+      </label>
+      <label>Email
+        <input type="email" name="email" required>
+      </label>
+      <label>Phone
+        <input type="tel" name="phone" maxlength="30">
+      </label>
+      <label>Message
+        <textarea name="message" required maxlength="2000"></textarea>
+      </label>
+      <button class="btn" type="submit">Send Message</button>
+    </form>
+  </main>
+  <footer><p>&copy; 2026 AutoClean360</p></footer>
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" required>
-
-            <label for="message">Message:</label>
-            <textarea id="message" name="message" required></textarea>
-
-            <button type="submit">Send Message</button>
-        </form>
-
-        <div class="map">
-            <iframe src="https://www.google.com/maps/embed?pb=451 EMILY HOBHOUSE PRETORIA NORTH" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-        </div>
-    </section>
-
-   <footer>
-  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
-    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
-  </div>
-</footer>
-
+  <script src="auth.js"></script>
+  <script>
+    const msg = document.getElementById('msg');
+    document.getElementById('contact-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.innerHTML = '';
+      const f = e.target;
+      try {
+        await api('/api/contact', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: f.name.value.trim(),
+            email: f.email.value.trim(),
+            phone: f.phone.value.trim() || undefined,
+            message: f.message.value.trim(),
+          }),
+        });
+        msg.innerHTML = '<div class="alert alert-success">Message sent — we\'ll be in touch.</div>';
+        f.reset();
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    });
+  </script>
 </body>
 </html>

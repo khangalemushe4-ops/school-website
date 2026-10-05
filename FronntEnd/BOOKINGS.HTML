@@ -3,65 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bookings</title>
- <link rel="stylesheet" href="style.css">
- 
- 
- </head>
- <body>
-  <nav>
-  <a href="HOME.HTML">HOME</a>
-   <a href="BOOKINGS.HTML">BOOKINGS</a>
-    <a href="Vehicles.HTML">VEHICLES</a>
-    <a href="PAYMENTS.HTML">PAYMENTS</a>
-    <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>
-  </nav>
-  
-  
-  <section id="bookings">
-  <h2>Book Your Car Wash</h2>
-  <p>Fill in the details below to schedule your wash. Instant confirmation guaranteed!</p>
-  
-  <form>
-    <label>Vehicle Make & Model:
-      <input type="text" name="vehicle" required>
-    </label><br><br>
-    
-    <label>Registration Number:
-      <input type="text" name="reg" required>
-    </label><br><br>
-    
-    <label>Service Type:
-      <select name="service" required>
-        <option value="standard">Standard Wash</option>
-        <option value="deluxe">Deluxe Wash</option>
-        <option value="interior">Interior Cleaning</option>
-        <option value="detailing">Full Detailing</option>
-      </select>
-    </label><br><br>
-    
-    <label>Date:
-      <input type="date" name="date" required>
-    </label><br><br>
-    
-    <label>Time:
-      <input type="time" name="time" required>
-    </label><br><br>
-    
-    <label>Contact Email:
-      <input type="email" name="email" required>
-    </label><br><br>
-    
-    <button class="btn" type="submit">Confirm Booking</button>
-  </form>
-</section>
+  <title>Bookings — AutoClean360</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <main class="container">
+    <h2>Book Your Car Wash</h2>
+    <p class="muted">Pick a vehicle, a service, a date, and a time. Instant confirmation.</p>
+    <div id="msg"></div>
 
- <footer>
-  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
-    <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
-  </div>
-</footer>
+    <form id="booking-form" class="card" style="max-width:560px;">
+      <label>Vehicle
+        <select name="vehicle_id" id="vehicle_id" required></select>
+      </label>
+      <label>Service
+        <select name="service_id" id="service_id" required></select>
+      </label>
+      <label>Date
+        <input type="date" name="booking_date" id="booking_date" required>
+      </label>
+      <label>Time (24h)
+        <input type="time" name="booking_time" id="booking_time" required>
+      </label>
+      <button class="btn" type="submit">Confirm Booking</button>
+    </form>
 
-	
+    <h3 class="mt-2">Your Bookings</h3>
+    <div id="list"></div>
+  </main>
+  <footer><p>&copy; 2026 AutoClean360</p></footer>
+
+  <script src="auth.js"></script>
+  <script>
+    requireAuth();
+    const form = document.getElementById('booking-form');
+    const msg = document.getElementById('msg');
+    const listEl = document.getElementById('list');
+    const vehicleSel = document.getElementById('vehicle_id');
+    const serviceSel = document.getElementById('service_id');
+
+    async function loadDropdowns() {
+      const [vehicles, services] = await Promise.all([api('/api/vehicles'), api('/api/services')]);
+      if (!vehicles.length) {
+        msg.innerHTML = '<div class="alert alert-error">You have no vehicles yet. <a href="vehicles.html">Add one first</a>.</div>';
+      }
+      vehicleSel.innerHTML = vehicles.map(v => `<option value="${v.id}">${v.make_model} — ${v.reg_number}</option>`).join('');
+      serviceSel.innerHTML = services.map(s => `<option value="${s.id}">${s.name} — R${Number(s.price).toFixed(2)} (${s.duration_min}min)</option>`).join('');
+    }
+
+    async function loadBookings() {
+      try {
+        const rows = await api('/api/bookings');
+        if (!rows.length) { listEl.innerHTML = '<p class="muted">No bookings yet.</p>'; return; }
+        listEl.innerHTML = `
+          <table>
+            <thead><tr><th>Date</th><th>Time</th><th>Vehicle</th><th>Service</th><th>Payment</th><th>Status</th><th></th></tr></thead>
+            <tbody>${rows.map(b => `
+              <tr>
+                <td>${b.booking_date?.slice(0,10)}</td>
+                <td>${b.booking_time}</td>
+                <td>${b.vehicle.make_model} (${b.vehicle.reg_number})</td>
+                <td>${b.service.name} — R${Number(b.service.price).toFixed(2)}</td>
+                <td><span class="pill pill-${b.payment?.status || 'unpaid'}">${b.payment?.status || 'unpaid'}</span></td>
+                <td><span class="pill pill-${b.status}">${b.status}</span></td>
+                <td>
+                  ${b.status === 'pending' || b.status === 'confirmed'
+                    ? `<button class="btn btn-sm btn-danger" data-cancel="${b.id}">Cancel</button>` : ''}
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+      } catch (err) {
+        listEl.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.innerHTML = '';
+      const body = {
+        vehicle_id: Number(vehicleSel.value),
+        service_id: Number(serviceSel.value),
+        booking_date: form.booking_date.value,
+        booking_time: form.booking_time.value,
+      };
+      try {
+        await api('/api/bookings', { method: 'POST', body: JSON.stringify(body) });
+        msg.innerHTML = '<div class="alert alert-success">Booking created!</div>';
+        form.reset();
+        loadBookings();
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    });
+
+    listEl.addEventListener('click', async (e) => {
+      const id = e.target.dataset.cancel;
+      if (!id) return;
+      if (!confirm('Cancel this booking?')) return;
+      try {
+        await api('/api/bookings/' + id + '/cancel', { method: 'PATCH' });
+        loadBookings();
+      } catch (err) { alert(err.message); }
+    });
+
+    (async () => {
+      try {
+        await loadDropdowns();
+        await loadBookings();
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -3,141 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoClean360</title>
- <link rel="stylesheet" href="style.css">
-
- <style>
-    header {
-      background-image: url('OIP (1).webp'); /* path to your image */
-      background-size: cover;       /* makes image cover the entire header */
-      background-position: center;  /* centers the image */
-      height: 300px;                /* header height */
-      color: white;                 /* text color */
-      display: flex;                /* flexbox for centering text */
-      align-items: center;          /* vertical center */
-      justify-content: center;      /* horizontal center */
-      text-align: center;
-    }
-    header h1 {
-      font-size: 2.5rem;
-      background: rgba(0,0,0,0.5);  /* semi-transparent overlay for readability */
-      padding: 15px 30px;
-      border-radius: 8px;
-    }
-  </style>
-
-</head> 
-<body>
-<header>
-    <h1>AutoClean360 Car Wash Management</h1>
-  </header>
-  <nav>
-  <a href="HOME.HTML">HOME</a>
-
-        <a href="Vehicles.HTML">VEHICLES</a>
-        <a href="PAYMENTS.HTML">PAYMENTS</a>
-        <a href="NOTIFICATIONS.HTML">NOTIFICATIONS</a>	
-		<a href="CONTACT.HTML">CONTACT</a>
-  </nav>
-  <body style="background-image:url(OIP (1).webp); background-size:cover" >
-  
-  <main>
-  
-  <section id="home">
-    <h2>Welcome to AutoClean360</h2>
-    <p>Book your car wash, manage your vehicles, make payments, and receive notifications — all in one place and enjoy our services.</p>
-    <button class="btn" onclick="alert('Redirecting to bookings...')"><a href="BOOKINGS.HTML">Book Now</a></button>
-  </section>
-
-  <section id="home">
-  <h1><Align="center-right">I'ts time to come and clean your car</h1>
-  <p><Align="center">Empowering car wash businesses with a seamless designed ecosytem designed for</br> efficiency customer satisfaction</p>
-  
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f9ff;
-      margin: 40px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 16px;
-      text-align: left;
-    }
-    table th, table td {
-      border: 1px solid #ddd;
-      padding: 12px;
-    }
-    table th {
-      background-color: #0077cc;
-      color: white;
-    }
-    table tr:nth-child(even) {
-      background-color: #eef6ff;
-    }
-    table tr:hover {
-      background-color: #d9ecff;
-    }
-    h2 {
-      color: #0077cc;
-      text-align: center;
-    }
-  </style>
+  <title>AutoClean360 — Book Your Car Wash</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+<body>
+  <nav id="main-nav"></nav>
 
-  
-  <table>
-    
-      <td><b><h2>Mobile Bookings</h2></b></br>
-      Book car wash services directly from your mobile device, anytime and anywhere.</td>
-    
-    
-      <td><b><h2>Vehicle Portfolio</h2></b></br>
-      Manage multiple vehicles in one account with saved details for faster bookings.</td>
-    </td>
-   
-      <td><b><h2>Live Alerts</h2></b></br>
-      Receive instant SMS or email notifications about bookings, payments, and service updates.</td>
-   
-  </table>
-  
-  </section>
-  
+  <header class="hero">
+    <h1>AutoClean360 Car Wash Management</h1>
+    <p>Book your slot, manage your vehicles, pay online, and get notified. Clean cars, made simple.</p>
+    <a href="bookings.html" class="btn">Book a Wash</a>
+    <a href="signup.html" class="btn btn-secondary">Create Account</a>
+  </header>
+
+  <main class="container">
+    <section>
+      <h2>Why AutoClean360?</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Mobile Bookings</h3>
+          <p>Reserve your wash slot from any device, any time — no phone calls needed.</p>
+        </div>
+        <div class="card">
+          <h3>Vehicle Portfolio</h3>
+          <p>Save your cars once and reuse their details for every future booking.</p>
+        </div>
+        <div class="card">
+          <h3>Live Alerts</h3>
+          <p>Instant email or SMS notifications about bookings, payments, and service updates.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Our Work</h2>
+      <div class="gallery">
+        <img src="OIP (1).webp" alt="Car being washed">
+        <img src="OIP (2).webp" alt="Clean car after wash">
+        <img src="OIP (3).webp" alt="Detailing in progress">
+        <img src="OIP (4).webp" alt="Interior cleaning">
+        <img src="OIP (5).webp" alt="Car shampoo foam">
+        <img src="OIP (6).webp" alt="Polished car exterior">
+      </div>
+    </section>
+
+    <section>
+      <h2>See Us In Action</h2>
+      <div class="video-grid">
+        <video controls muted playsinline poster="OIP (1).webp">
+          <source src="videos/wash1.mp4" type="video/mp4">
+        </video>
+        <video controls muted playsinline poster="OIP (4).webp">
+          <source src="videos/wash2.mp4" type="video/mp4">
+        </video>
+      </div>
+      <p class="muted">Drop your own MP4 clips into <code>FronntEnd/videos/</code> as <code>wash1.mp4</code> and <code>wash2.mp4</code>. If you don't have them yet, delete these <code>&lt;video&gt;</code> tags.</p>
+    </section>
+
+    <section class="center">
+      <h2>Ready to get started?</h2>
+      <p class="muted">Create an account to save your vehicles and bookings, or browse first.</p>
+      <a href="signup.html" class="btn">Sign Up Free</a>
+      <a href="services.html" class="btn btn-secondary">Browse Services</a>
+    </section>
   </main>
-   <!-- Footer Section -->
-    <footer>
-  <div class="container">
-    <div class="footer-content">
-      
-      <!-- Company Info -->
-      <div class="footer-section">
-        <h3>AutoClean360</h3>
-        <p>Connecting customers with professional service providers seamlessly and efficiently.</p>
-      </div>
-      
-      <!-- Contact Info -->
-      <div class="footer-section">
-        <h3>Contact Us</h3>
-        <p>Email: info@AutoClean360.co.za</p>
-        <p>Phone: 013 758 5456</p>
-        <p>Address: 79 Sarel Cilliers</p>
-		 <p>Monday - Friday: 8am - 5pm</p>
-      </div>
-    </div>
 
-    <!-- Divider -->
-    <hr style="width:50%; margin:20px auto;">
-
-    <!-- Footer Bottom -->
-   </footer> 
-<footer>
-  <div class="footer-bottom" style="text-align:center; padding:15px; background:#005fa3; color:white;">
+  <footer>
     <p>&copy; 2026 AutoClean360. All rights reserved. | support@autoclean360.com</p>
-  </div>
-     </div>
-</footer>
+  </footer>
 
+  <script src="auth.js"></script>
 </body>
 </html>
