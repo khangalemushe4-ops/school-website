@@ -5,19 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — AutoClean360</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0 4px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(6px);
+    }
+    .tab.active {
+      background: #fff;
+      color: var(--primary-dark);
+      border-color: #fff;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filters input, .filters select {
+      width: auto;
+      min-width: 180px;
+      margin: 0;
+    }
+    .row-actions select { min-width: 130px; }
+    .table-wrap { overflow-x: auto; }
+  </style>
 </head>
 <body>
   <nav id="main-nav"></nav>
   <main class="container">
-    <h2>Admin Dashboard</h2>
-    <div id="stats" class="grid"></div>
+    <div class="panel">
+      <h2 style="margin-top:0;">Admin Dashboard</h2>
 
-    <h3 class="mt-2">All Bookings</h3>
-    <p class="muted">Change a booking's status to confirm, complete, or cancel it.</p>
-    <div id="bookings"></div>
+      <div id="stats" class="grid"></div>
 
-    <h3 class="mt-2">All Users</h3>
-    <div id="users"></div>
+      <div class="tabs">
+        <button class="tab active" data-tab="bookings">Bookings</button>
+        <button class="tab" data-tab="users">Users</button>
+      </div>
+
+      <!-- Bookings tab -->
+      <div class="tab-panel active" id="panel-bookings">
+        <div class="filters">
+          <input type="search" id="booking-search" placeholder="Search by email, name, or service...">
+          <select id="booking-status-filter">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div id="bookings" class="table-wrap"></div>
+      </div>
+
+      <!-- Users tab -->
+      <div class="tab-panel" id="panel-users">
+        <div class="filters">
+          <input type="search" id="user-search" placeholder="Search by name or email...">
+        </div>
+        <div id="users" class="table-wrap"></div>
+      </div>
+    </div>
   </main>
   <footer><p>&copy; 2026 AutoClean360</p></footer>
 
@@ -30,60 +93,192 @@
     const bookingsEl = document.getElementById('bookings');
     const usersEl = document.getElementById('users');
 
+    let allBookings = [];
+    let allUsers = [];
+
+    // --- Tabs ---
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // --- Stats ---
     async function loadStats() {
       const s = await api('/api/admin/stats');
       statsEl.innerHTML = `
         <div class="card"><h3>${s.users}</h3><p class="muted">Users</p></div>
         <div class="card"><h3>${s.bookings}</h3><p class="muted">Bookings</p></div>
         <div class="card"><h3>${s.pending}</h3><p class="muted">Pending</p></div>
+        <div class="card"><h3>R${Number(s.revenue).toFixed(2)}</h3><p class="muted">Revenue</p></div>
         <div class="card"><h3>${s.vehicles}</h3><p class="muted">Vehicles</p></div>`;
     }
 
+    // --- Bookings ---
     async function loadBookings() {
-      const rows = await api('/api/admin/bookings');
-      bookingsEl.innerHTML = `<table>
-        <thead><tr><th>Date</th><th>User</th><th>Vehicle</th><th>Service</th><th>Status</th><th>Update</th></tr></thead>
-        <tbody>${rows.map(b => `
-          <tr>
-            <td>${b.booking_date?.slice(0,10)} ${b.booking_time}</td>
-            <td>${b.user.name}<br><span class="muted">${b.user.email}</span></td>
-            <td>${b.vehicle.make_model} (${b.vehicle.reg_number})</td>
-            <td>${b.service.name}</td>
-            <td><span class="pill pill-${b.status}">${b.status}</span></td>
-            <td>
-              <select data-id="${b.id}" class="status-sel">
-                ${['pending','confirmed','completed','cancelled'].map(s =>
-                  `<option value="${s}" ${s === b.status ? 'selected' : ''}>${s}</option>`).join('')}
-              </select>
-            </td>
-          </tr>`).join('')}
-        </tbody></table>`;
+      allBookings = await api('/api/admin/bookings');
+      renderBookings();
     }
 
-    async function loadUsers() {
-      const rows = await api('/api/admin/users');
-      usersEl.innerHTML = `<table>
-        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Admin</th><th>Joined</th></tr></thead>
-        <tbody>${rows.map(u => `
-          <tr>
-            <td>${u.id}</td><td>${u.name}</td><td>${u.email}</td>
-            <td>${u.phone || '—'}</td>
-            <td>${u.is_admin ? '✅' : ''}</td>
-            <td>${new Date(u.created_at).toLocaleDateString()}</td>
-          </tr>`).join('')}
-        </tbody></table>`;
+    function renderBookings() {
+      const q = (document.getElementById('booking-search').value || '').toLowerCase();
+      const statusFilter = document.getElementById('booking-status-filter').value;
+
+      const rows = allBookings.filter(b => {
+        if (statusFilter && b.status !== statusFilter) return false;
+        if (!q) return true;
+        const hay = `${b.user.name} ${b.user.email} ${b.service.name}`.toLowerCase();
+        return hay.includes(q);
+      });
+
+      if (!rows.length) {
+        bookingsEl.innerHTML = '<p class="muted" style="padding:16px;">No bookings match.</p>';
+        return;
+      }
+
+      bookingsEl.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Date / Time</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Amount</th>
+              <th>Booking</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+          <tbody>${rows.map(b => `
+            <tr>
+              <td>${b.booking_date?.slice(0,10)}<br><span class="muted">${b.booking_time}</span></td>
+              <td>${b.user.name}<br><span class="muted">${b.user.email}</span></td>
+              <td>${b.service.name}</td>
+              <td>R${Number(b.payment?.amount ?? b.service.price).toFixed(2)}</td>
+              <td class="row-actions">
+                <select data-booking-id="${b.id}" class="booking-status-sel">
+                  ${['pending','confirmed','completed','cancelled'].map(s =>
+                    `<option value="${s}" ${s === b.status ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+              </td>
+              <td class="row-actions">
+                <select data-payment-booking="${b.id}" class="payment-status-sel">
+                  ${['unpaid','paid','refunded','cancelled'].map(s =>
+                    `<option value="${s}" ${s === (b.payment?.status || 'unpaid') ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
     }
 
     bookingsEl.addEventListener('change', async (e) => {
-      if (!e.target.matches('.status-sel')) return;
-      try {
-        await api('/api/admin/bookings/' + e.target.dataset.id, {
-          method: 'PATCH',
-          body: JSON.stringify({ status: e.target.value }),
-        });
-      } catch (err) { alert(err.message); }
+      const bookingId = e.target.dataset.bookingId;
+      const paymentBooking = e.target.dataset.paymentBooking;
+
+      if (bookingId) {
+        try {
+          await api('/api/admin/bookings/' + bookingId, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: e.target.value }),
+          });
+          const b = allBookings.find(x => String(x.id) === bookingId);
+          if (b) b.status = e.target.value;
+        } catch (err) { alert(err.message); }
+      }
+
+      if (paymentBooking) {
+        try {
+          await api('/api/admin/payments/' + paymentBooking, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: e.target.value }),
+          });
+          const b = allBookings.find(x => String(x.id) === paymentBooking);
+          if (b) b.payment = { ...(b.payment || {}), status: e.target.value };
+        } catch (err) { alert(err.message); }
+      }
     });
 
+    document.getElementById('booking-search').addEventListener('input', renderBookings);
+    document.getElementById('booking-status-filter').addEventListener('change', renderBookings);
+
+    // --- Users ---
+    async function loadUsers() {
+      allUsers = await api('/api/admin/users');
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const q = (document.getElementById('user-search').value || '').toLowerCase();
+      const rows = allUsers.filter(u => {
+        if (!q) return true;
+        return `${u.name} ${u.email}`.toLowerCase().includes(q);
+      });
+
+      if (!rows.length) {
+        usersEl.innerHTML = '<p class="muted" style="padding:16px;">No users match.</p>';
+        return;
+      }
+
+      usersEl.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Bookings</th>
+              <th>Admin</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>${rows.map(u => `
+            <tr>
+              <td>${u.id}</td>
+              <td>${u.name}</td>
+              <td>${u.email}</td>
+              <td>${u.phone || '—'}</td>
+              <td>${u.booking_count}</td>
+              <td>
+                <label style="display:inline-flex; align-items:center; gap:6px; margin:0; font-weight:normal; color:inherit;">
+                  <input type="checkbox" data-user-id="${u.id}" class="admin-toggle" ${u.is_admin ? 'checked' : ''}>
+                  <span>${u.is_admin ? 'Admin' : 'User'}</span>
+                </label>
+              </td>
+              <td>${new Date(u.created_at).toLocaleDateString()}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    usersEl.addEventListener('change', async (e) => {
+      const userId = e.target.dataset.userId;
+      if (!userId || !e.target.matches('.admin-toggle')) return;
+      const makeAdmin = e.target.checked;
+      if (!confirm(`${makeAdmin ? 'Promote' : 'Demote'} this user?`)) {
+        e.target.checked = !makeAdmin;
+        return;
+      }
+      try {
+        await api('/api/admin/users/' + userId, {
+          method: 'PATCH',
+          body: JSON.stringify({ is_admin: makeAdmin }),
+        });
+        const u = allUsers.find(x => String(x.id) === userId);
+        if (u) u.is_admin = makeAdmin;
+        renderUsers();
+      } catch (err) {
+        alert(err.message);
+        e.target.checked = !makeAdmin;
+      }
+    });
+
+    document.getElementById('user-search').addEventListener('input', renderUsers);
+
+    // --- Boot ---
     (async () => {
       try {
         await loadStats();
