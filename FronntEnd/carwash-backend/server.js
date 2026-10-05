@@ -1,5 +1,6 @@
 require('dotenv').config(); // no-op on Render; loads .env if present locally
 
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -17,7 +18,12 @@ for (const key of ['DATABASE_URL', 'JWT_SECRET']) {
 const app = express();
 app.set('trust proxy', 1); // Render sits behind a proxy
 
-app.use(helmet());
+// Helmet with a relaxed CSP so the inline <script>/<style> in your HTML still runs
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // simplest for a school project; tighten later
+  })
+);
 
 const origins = (process.env.CORS_ORIGIN || '*').split(',').map((s) => s.trim());
 app.use(cors({ origin: origins.includes('*') ? true : origins }));
@@ -26,8 +32,8 @@ app.use(express.json({ limit: '100kb' }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }));
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true, legacyHeaders: false });
 
-// Health checks (Render can use /health; it doesn't touch the DB so Neon can sleep)
-app.get('/', (req, res) => res.json({ service: 'carwash-api', status: 'ok' }));
+// ---- API routes FIRST (so /api/* never falls through to static) ----
+
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.get('/health/db', async (req, res) => {
   await db.query('SELECT 1');
@@ -44,7 +50,24 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/contact', require('./routes/contact'));
 
-app.use((req, res) => res.status(404).json({ error: 'Not found' }));
+// ---- Static frontend AFTER API routes ----
+// Files live one level up, in FronntEnd/ (HOME.HTML, BOOKINGS.HTML, style.css, etc.)
+const FRONTEND_DIR = path.join(__dirname, '..');
+app.use(express.static(FRONTEND_DIR));
+
+// Home page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(FRONTEND_DIR, 'HOME.HTML'));
+});
+
+// API 404 (only matches paths starting with /api)
+app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
+
+// Everything else: send the home page (so unknown URLs still load the site, not a JSON error)
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(FRONTEND_DIR, 'HOME.HTML'));
+});
+
 app.use(errorHandler);
 
 const port = process.env.PORT || 3000;
