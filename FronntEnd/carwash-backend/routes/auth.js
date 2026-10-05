@@ -27,7 +27,8 @@ const profileSchema = z.object({
   notify_method: z.enum(['email', 'sms']).optional(),
 });
 
-const USER_FIELDS = 'id, name, email, phone, notify_method, created_at';
+// NOTE: is_admin is included so the frontend knows whether to show the Admin link.
+const USER_FIELDS = 'id, name, email, phone, notify_method, created_at, is_admin';
 
 router.post('/register', async (req, res) => {
   const b = registerSchema.parse(req.body);
