@@ -13,6 +13,7 @@
     <div id="stats" class="grid"></div>
 
     <h3 class="mt-2">All Bookings</h3>
+    <p class="muted">Change a booking's status to confirm, complete, or cancel it.</p>
     <div id="bookings"></div>
 
     <h3 class="mt-2">All Users</h3>
@@ -35,7 +36,6 @@
         <div class="card"><h3>${s.users}</h3><p class="muted">Users</p></div>
         <div class="card"><h3>${s.bookings}</h3><p class="muted">Bookings</p></div>
         <div class="card"><h3>${s.pending}</h3><p class="muted">Pending</p></div>
-        <div class="card"><h3>R${Number(s.revenue).toFixed(2)}</h3><p class="muted">Revenue</p></div>
         <div class="card"><h3>${s.vehicles}</h3><p class="muted">Vehicles</p></div>`;
     }
 

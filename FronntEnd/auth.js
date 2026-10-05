@@ -47,15 +47,12 @@ function renderNav() {
   const user = Auth.user;
   const guestLinks = `
     <a href="home.html">Home</a>
-    <a href="bookings.html">Bookings</a>
     <a href="services.html">Services</a>
     <a href="contact.html">Contact</a>`;
   const userLinks = `
     <a href="home.html">Home</a>
     <a href="bookings.html">Bookings</a>
     <a href="vehicles.html">Vehicles</a>
-    <a href="payments.html">Payments</a>
-    <a href="notifications.html">Notifications</a>
     <a href="contact.html">Contact</a>`;
   const adminLink = Auth.isAdmin() ? `<a href="admin.html">Admin</a>` : '';
   const right = user
@@ -65,7 +62,6 @@ function renderNav() {
     : `<a href="login.html">Login</a>
        <a href="signup.html" class="nav-cta">Sign up</a>`;
   nav.innerHTML = `
-    <div class="nav-brand"><a href="home.html">AutoClean360</a></div>
     <div class="nav-links">${user ? userLinks : guestLinks}</div>
     <div class="nav-actions">${right}</div>`;
 }
